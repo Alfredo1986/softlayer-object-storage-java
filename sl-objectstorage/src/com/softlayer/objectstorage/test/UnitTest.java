@@ -1,6 +1,8 @@
 package com.softlayer.objectstorage.test;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.restlet.data.Form;
 import org.restlet.data.Parameter;
-
-import static org.junit.Assert.assertTrue;
 
 import com.softlayer.objectstorage.Account;
 import com.softlayer.objectstorage.Container;
@@ -99,6 +99,28 @@ public class UnitTest extends TestCase {
 		Map<String, String> tags = new HashMap<String, String>();
 		tags.put("testtag", "testvalue");
 		ofile.uploadFile("restletupload.txt", tags);
+		Container container = new Container("RestletContainer", baseUrl, user,
+				password, true);
+		List<ObjectFile> files = container.listObjectFiles();
+		for (ObjectFile file : files) {
+			if (file.getName().equalsIgnoreCase("restletupload.txt")) {
+
+				return;
+			}
+		}
+		assertTrue(false);
+	}
+	
+	@Test
+	public void testObjectFileCreateInputStream() throws IOException, EncoderException {
+	
+		
+		InputStream inputstream = new FileInputStream("restletupload.txt");
+		ObjectFile ofile = new ObjectFile("restletupload.txt",
+				"RestletContainer", baseUrl, user, password, true);
+		Map<String, String> tags = new HashMap<String, String>();
+		tags.put("testtag", "testvalue");
+		ofile.uploadFile(inputstream, tags);
 		Container container = new Container("RestletContainer", baseUrl, user,
 				password, true);
 		List<ObjectFile> files = container.listObjectFiles();
