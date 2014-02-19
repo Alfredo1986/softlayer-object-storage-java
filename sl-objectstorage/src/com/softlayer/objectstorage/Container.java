@@ -9,6 +9,7 @@ import org.apache.commons.codec.EncoderException;
 import org.apache.commons.lang.text.StrTokenizer;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
+import org.restlet.resource.ResourceException;
 
 /**
  * Unless otherwise noted, all files are released under the MIT license,
@@ -39,7 +40,7 @@ import org.restlet.resource.ClientResource;
  * other dealings in this Software without prior written authorization from
  * SoftLayer Technologies, Inc.
  * 
- * Portions Copyright © 2008-9 Rackspace US, Inc.
+ * Portions Copyright ï¿½ 2008-9 Rackspace US, Inc.
  * 
  * This class represents a container on the objectstorage server
  * 
@@ -201,6 +202,109 @@ public class Container extends Client {
 		super.delete(params, super.cdnurl + "/" + uName);
 
 	}
+	
+	
+	
+	/**
+	 * this method gets a list of objects in this container on the
+	 * objectstorage server
+	 * 
+	 * @param path
+	 *            the path of the container this object resides in
+	 * 
+	 * @return list of objectfiles
+	 * @throws EncoderException
+	 * @throws IOException
+	 */
+	public  List<ObjectFile>  getSubContainerList(String path) throws EncoderException, IOException {
+		Hashtable<String, String> params = super.createAuthParams();
+		List<ObjectFile> ofList= new ArrayList<ObjectFile>();
+		String uName = super.saferUrlEncode(this.name);
+		String uPath = super.saferUrlEncode(path);
+		String url = super.storageurl + "/"+ uName;
+		String queryString = "?path=" +uPath;
+		ClientResource client = super.get(params, url+ queryString);
+		Representation entity = client.getResponseEntity();
+		String containers = entity.getText();
+		StrTokenizer tokenize = new StrTokenizer(containers);
+		tokenize.setDelimiterString("\n");
+		String[] obj = tokenize.getTokenArray();
+		this.objs = new ArrayList<ObjectFile>();
+		for (String token : obj) {
+			ofList.add(new ObjectFile(token, this.name, this.baseUrl,
+					this.username, this.password, false));
+		}
+
+		return ofList;
+	}
+	
+	
+
+	/**
+	 * this method gets an object in this container on the
+	 * objectstorage server
+	 * 
+	 * @param path
+	 *            the path of the container this object resides in
+	 * @param name
+	 *            the name of the server side objectstorage object
+	 * 
+	 * @return objectfile
+	 * @throws EncoderException
+	 * @throws IOException
+	 */
+	public  ObjectFile getObjectFileByName(String path, String name) throws EncoderException, IOException {
+		Hashtable<String, String> params = super.createAuthParams();
+		String uPath=super.saferUrlEncode(path);
+		String uName = super.saferUrlEncode(name);
+		ClientResource client = super.get(params, super.storageurl + "/" +uPath + "/" +uName);
+		Representation entity = client.getResponseEntity();
+		String containers = entity.getText();
+		String[] s = containers.split("\n");
+		
+		if (s.length>0){
+			ObjectFile obj = new ObjectFile(name, path, this.baseUrl, this.username, this.password, false);
+			
+			return obj;
+		}else{
+			throw new IOException("File not found");
+		}	
+	}
+	
+
+	/**
+	 * this method check if exist an object in this container on the
+	 * objectstorage server 
+	 * 
+	 * @param path
+	 *            the path of the container this object resides in
+	 * @param name
+	 *            the name of the server side objectstorage object
+	 * 
+	 * @return true if exist, false otherwise
+	 * @throws EncoderException
+	 * @throws IOException
+	 */
+	public  boolean checkFileExist(String path, String name) throws EncoderException, IOException {
+		Hashtable<String, String> params = super.createAuthParams();
+		boolean exist=false;
+		String uPath=super.saferUrlEncode(path);
+		String uName = super.saferUrlEncode(name);
+		try{
+		ClientResource client = super.head(params, super.storageurl + "/" +uPath + "/" +uName);
+		Representation entity = client.getResponseEntity();
+		entity.getSize();
+		exist=true;
+		}
+		catch (ResourceException e) {
+			if (e.getStatus().getCode()==404){
+				exist=false;
+			}else{
+				throw e;
+			}
+		}
+		return exist;
+	}
 
 	/**
 	 * Utility method for getting data from REST api to populate this object
@@ -220,7 +324,6 @@ public class Container extends Client {
 		String[] obj = tokenize.getTokenArray();
 		this.objs = new ArrayList<ObjectFile>();
 		for (String token : obj) {
-
 			this.objs.add(new ObjectFile(token, this.name, this.baseUrl,
 					this.username, this.password, false));
 

@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import org.restlet.Context;
 import org.restlet.Response;
 import org.restlet.data.Form;
-import org.restlet.data.Protocol;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 
@@ -45,7 +44,7 @@ import org.restlet.resource.ClientResource;
  * other dealings in this Software without prior written authorization from
  * SoftLayer Technologies, Inc.
  * 
- * Portions Copyright © 2008-9 Rackspace US, Inc.
+ * Portions Copyright ï¿½ 2008-9 Rackspace US, Inc.
  * 
  * 
  * base client for making calls to objectstorage API
@@ -243,7 +242,6 @@ public class Client {
 		case GET:
 			setCustomHttpHeader(params, requestResource);
 			requestResource.get();
-
 			break;
 
 		case HEAD:
