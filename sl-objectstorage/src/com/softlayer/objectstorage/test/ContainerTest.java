@@ -39,11 +39,11 @@ public class ContainerTest  {
 			ofile.uploadFile(inputstream, tags);
 			
 			
-			boolean exist = container.checkFileExist("RestletContainer", "restletupload.txt");
+			boolean exist = container.checkFileExist("restletupload.txt");
 			assertTrue(exist);
 		
 			ofile.remove();
-			exist = container.checkFileExist("RestletContainer", "restletupload.txt");
+			exist = container.checkFileExist("restletupload.txt");
 			assertFalse(exist);
 			container.remove();
 			
@@ -64,7 +64,7 @@ public class ContainerTest  {
 			ofile.uploadFile(inputstream, tags);
 			
 			
-			boolean exist = container.checkFileExist("RestletContainer/subContainer", "restletupload.txt");
+			boolean exist = container.checkFileExist("subContainer/restletupload.txt");
 			assertTrue(exist);
 			
 			// Test getSubContainerList
@@ -73,12 +73,12 @@ public class ContainerTest  {
 			assertEquals("subContainer/restletupload.txt",subContainerList.get(0).getName() );
 			
 			// Test getObjectFileByName
-			ObjectFile myFile = container.getObjectFileByName("RestletContainer/subContainer", "restletupload.txt");
+			ObjectFile myFile = container.getObjectFile("subContainer/restletupload.txt");
 			assertNotNull(myFile);
-			assertEquals("restletupload.txt",myFile.getName());
+			assertEquals("subContainer/restletupload.txt",myFile.getName());
 			
 			myFile.remove();
-			exist = container.checkFileExist("RestletContainer/subContainer", "restletupload.txt");
+			exist = container.checkFileExist("subContainer/restletupload.txt");
 			assertFalse(exist);
 			container.remove();			
 			

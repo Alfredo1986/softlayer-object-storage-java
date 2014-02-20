@@ -222,7 +222,7 @@ public class Container extends Client {
 		String uName = super.saferUrlEncode(this.name);
 		String uPath = super.saferUrlEncode(path);
 		String url = super.storageurl + "/"+ uName;
-		String queryString = "?path=" +uPath;
+		String queryString = "?prefix=" +uPath;
 		ClientResource client = super.get(params, url+ queryString);
 		Representation entity = client.getResponseEntity();
 		String containers = entity.getText();
@@ -246,24 +246,27 @@ public class Container extends Client {
 	 * 
 	 * @param path
 	 *            the path of the container this object resides in
-	 * @param name
-	 *            the name of the server side objectstorage object
-	 * 
 	 * @return objectfile
 	 * @throws EncoderException
 	 * @throws IOException
 	 */
-	public  ObjectFile getObjectFileByName(String path, String name) throws EncoderException, IOException {
+	public  ObjectFile getObjectFile(String path) throws EncoderException, IOException {
 		Hashtable<String, String> params = super.createAuthParams();
-		String uPath=super.saferUrlEncode(path);
-		String uName = super.saferUrlEncode(name);
-		ClientResource client = super.get(params, super.storageurl + "/" +uPath + "/" +uName);
+		String uContainerName = super.saferUrlEncode(this.name);
+		String url = super.storageurl + "/" +uContainerName;
+		
+		if (path!=null && path!="" ){
+			String uPath = super.saferUrlEncode(path);
+			 url =  url+ "/" +uPath;
+		}
+		
+		ClientResource client = super.get(params, url);
 		Representation entity = client.getResponseEntity();
 		String containers = entity.getText();
 		String[] s = containers.split("\n");
 		
 		if (s.length>0){
-			ObjectFile obj = new ObjectFile(name, path, this.baseUrl, this.username, this.password, false);
+			ObjectFile obj = new ObjectFile(name, this.name, this.baseUrl, this.username, this.password, false);
 			
 			return obj;
 		}else{
@@ -278,20 +281,23 @@ public class Container extends Client {
 	 * 
 	 * @param path
 	 *            the path of the container this object resides in
-	 * @param name
-	 *            the name of the server side objectstorage object
-	 * 
 	 * @return true if exist, false otherwise
 	 * @throws EncoderException
 	 * @throws IOException
 	 */
-	public  boolean checkFileExist(String path, String name) throws EncoderException, IOException {
+	public  boolean checkFileExist(String path) throws EncoderException, IOException {
 		Hashtable<String, String> params = super.createAuthParams();
 		boolean exist=false;
-		String uPath=super.saferUrlEncode(path);
-		String uName = super.saferUrlEncode(name);
+		String uContainerName = super.saferUrlEncode(this.name);
+		String url = super.storageurl + "/" +uContainerName;
+		
+		if (path!=null && path!="" ){
+			String uPath = super.saferUrlEncode(path);
+			 url =  url+ "/" +uPath;
+		}
+		
 		try{
-		ClientResource client = super.head(params, super.storageurl + "/" +uPath + "/" +uName);
+		ClientResource client = super.head(params, url);
 		Representation entity = client.getResponseEntity();
 		entity.getSize();
 		exist=true;
